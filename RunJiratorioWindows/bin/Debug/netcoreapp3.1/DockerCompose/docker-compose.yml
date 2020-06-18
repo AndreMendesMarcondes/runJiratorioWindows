@@ -1,0 +1,38 @@
+version: "3.4"
+
+services:
+
+  postgres-jiratorio:
+    image: postgres
+    environment:
+      POSTGRES_PASSWORD: "123123"
+      POSTGRES_USER: postgres
+      POSTGRES_DB: jiratorio
+    restart: unless-stopped
+    ports:
+      - "15432:5432"
+    volumes:
+      - /home/mineiro/Desenvolvimento/Docker-Compose/PostgreSQL:/var/lib/postgresql/data 
+  
+  jirareport-api:
+    image: jirareport/jirareport-api:latest
+    restart: always
+    environment:
+      SPRING_DATASOURCE_URL: "jdbc:postgresql://postgres-jiratorio:5432/jiratorio"
+      SPRING_DATASOURCE_USERNAME: "postgres"
+      SPRING_DATASOURCE_PASSWORD: "123123"
+      HOLIDAY_TOKEN: "YW5kcmUubWFyY29uZGVzQGludmlsbGlhLmNvbSZoYXNoPTI1NTE5NDc0NQ"
+      SECURITY_KEY: "YW5kcmUubWFyY29uZG"
+      JIRA_URL: "http://jira.viavarejo.com.br/"
+    depends_on:
+      - postgres-jiratorio  
+
+  jirareport-web:
+    image: jirareport/jirareport-web:latest
+    restart: always
+    environment:
+      JIRAREPORT_API_URL: "http://jirareport-api"
+    ports:
+      - 80:80
+    depends_on:
+      - jirareport-api
